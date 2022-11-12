@@ -25,3 +25,6 @@ def sum_digits(n):
     strr = str(n)
     list_of_number = list(map(int, strr.strip()))
     return sum(list_of_number)
+
+def bitstring_to_bytes(s):
+    return int(s, 2).to_bytes((len(s) + 7) // 8, byteorder='big')
