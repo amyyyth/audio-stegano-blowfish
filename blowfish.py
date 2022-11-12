@@ -10,32 +10,17 @@ def bf_enc(msg,key):
         encoded=key.encode('utf-8')
         key = bytearray(encoded)
     bs = Blowfish.block_size
-    # key = b'An arbitrarily long key'
     cipher = Blowfish.new(key, Blowfish.MODE_CBC)
 
     plen = bs - len(msg) % bs
     padding = [plen]*plen
     padding = pack('b'*plen, *padding)
     c_text = cipher.iv + cipher.encrypt(msg + padding)
-    # return c_text.decode("unicode_escape")
     return c_text
 
 # CTEXT MUST BE A BYTE ARRAY
 def bf_dec(c_text,key):
-    if(type(c_text) != bytes):
-        # c_text = (c_text
-        #     .encode()                      
-        #     .decode('unicode_escape')      
-        #     .encode('unicode_escape').decode('unicode_escape')    
-        #     .lstrip('b').strip("'")
-        #     .encode('unicode_escape'))
-        encoded=c_text.encode('unicode_escape')
-        c_text = bytearray(encoded) 
-    if(type(key) != bytes):
-        encoded=key.encode('utf-8')
-        key = bytearray(encoded)
     bs = Blowfish.block_size
-    # c_text = msg
     iv = c_text[:bs]
     c_text = c_text[bs:]
 

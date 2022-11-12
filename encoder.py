@@ -7,7 +7,8 @@ def encode(msg,cover):
     audio = read_audio(cover)
 
     # ENCODE THE MSG
-    b_enc = str_to_bin(msg)
+    # b_enc = str_to_bin(msg)
+    b_enc = binstream_to_bin(msg)
 
     msg_len = len(b_enc)//8
 
@@ -64,7 +65,7 @@ def decode(file,s_key):
         t = sum_digits(s)
         q = t % 8
 
-    return bin_to_str(b)
+    return bin_to_binstream(b)
 
 # s_key = encode("hello baby sughano",r"C:\Users\amith\Code\crypto\cover.wav")
 
