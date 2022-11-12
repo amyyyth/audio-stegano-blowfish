@@ -66,9 +66,9 @@ def decode(file,s_key):
 
     return bin_to_str(b)
 
-s_key = encode("hello baby sughano",r"C:\Users\amith\Code\crypto\cover.wav")
+# s_key = encode("hello baby sughano",r"C:\Users\amith\Code\crypto\cover.wav")
 
-print(decode(r"C:\Users\amith\Code\crypto\encoded.wav",s_key))
+# print(decode(r"C:\Users\amith\Code\crypto\encoded.wav",s_key))
 
 
 
