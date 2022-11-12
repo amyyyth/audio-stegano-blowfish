@@ -66,8 +66,43 @@ def decode(file,s_key):
     return bin_to_binstream(b)
 
 
+def end_encoder(cover, byts):
+    # READ AUDIO
+    audio = read_audio(cover)
 
+    # ENCODE THE MSG
+    b_enc = binstream_to_bin(byts)
+    j = 0
 
+    for i in range(len(audio),len(audio)-len(b_enc),-1):
+        val = bin(audio[i])[2:]
+        val = ('0'*(8-len(val)))+val
+        val[-1] = b_enc[j]
+        val[-2] = '0'       # TO know that there is more data to decode
+        audio[i] = val
 
+    eod_marker_pos = -(len(b_enc)+1)
+
+    val = bin(audio[eod_marker_pos])[2:]
+    val = val = ('0'*(8-len(val)))+val
+    val[-2] = '1'
+    audio[eod_marker_pos] = val     # Mark the end of data
+
+    # WRITE INTO AUDIO FILE
+    with open('encoded.wav', mode='bw+') as f:
+        f.write(audio)
+
+def end_decoder(aud):
+    # READ AUDIO
+    audio = read_audio(aud)
+    s = ''
+    for i in range(len(audio)-1,-1,-1):
+        val = bin(audio[i])[2:]
+        val = ('0'*(8-len(val)))+val
+        if(val[-2] == '1'):
+            break
+        s += val[-1]
+
+    return bin_to_binstream(s)
 
 
