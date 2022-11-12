@@ -1,13 +1,11 @@
 from utils import *
 
 def encode(msg,cover):
-    # cover = r"C:\Users\amith\Downloads\file_example_WAV_2MG.wav"
 
     # READ AUDIO
     audio = read_audio(cover)
 
     # ENCODE THE MSG
-    # b_enc = str_to_bin(msg)
     b_enc = binstream_to_bin(msg)
 
     msg_len = len(b_enc)//8
@@ -67,9 +65,7 @@ def decode(file,s_key):
 
     return bin_to_binstream(b)
 
-# s_key = encode("hello baby sughano",r"C:\Users\amith\Code\crypto\cover.wav")
 
-# print(decode(r"C:\Users\amith\Code\crypto\encoded.wav",s_key))
 
 
 
