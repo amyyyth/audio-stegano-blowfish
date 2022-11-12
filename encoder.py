@@ -48,7 +48,7 @@ def decode(file,s_key):
     s = s_key        # Get the first hidden position
     t = sum_digits(s)
     q = t % 8
-
+    s = int(s)
     l = 8*(s - 60)
 
     b = ''
@@ -74,19 +74,18 @@ def end_encoder(cover, byts):
     b_enc = binstream_to_bin(byts)
     j = 0
 
-    for i in range(len(audio),len(audio)-len(b_enc),-1):
+    for i in range(len(audio)-1,len(audio)-len(b_enc),-1):
         val = bin(audio[i])[2:]
         val = ('0'*(8-len(val)))+val
-        val[-1] = b_enc[j]
-        val[-2] = '0'       # TO know that there is more data to decode
-        audio[i] = val
+        val = val[:-2]+'0'+ b_enc[j]    # '0' TO know that there is more data to decode
+        audio[i] = int(val,2)
 
     eod_marker_pos = -(len(b_enc)+1)
 
     val = bin(audio[eod_marker_pos])[2:]
     val = val = ('0'*(8-len(val)))+val
-    val[-2] = '1'
-    audio[eod_marker_pos] = val     # Mark the end of data
+    val = val[:-2]+'1'+val[-1]
+    audio[eod_marker_pos] = int(val,2)     # Mark the end of data
 
     # WRITE INTO AUDIO FILE
     with open('encoded.wav', mode='bw+') as f:

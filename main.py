@@ -12,10 +12,14 @@ s_key = encode(bf,r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\cover.wav"
 
 s_key_bf = bf_enc(str(s_key),key)
 
-end_encoder(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\cover.wav",s_key_bf)
+end_encoder(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav",s_key_bf)
 
-s_key_dec = end_decoder(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\cover.wav")
+s_key_rec = end_decoder(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav")
 
-cp = decode(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav",s_key_dec)
+s_key_dec = bf_dec(s_key_bf,key)
 
-print(bf_dec(cp,key))
+cp = decode(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav",(s_key_dec))
+
+msg_rec = (bf_dec(cp,key))
+
+print(msg_rec)
