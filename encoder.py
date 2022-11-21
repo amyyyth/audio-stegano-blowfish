@@ -74,16 +74,24 @@ def end_encoder(cover, byts):
     b_enc = binstream_to_bin(byts)
     j = 0
 
-    for i in range(len(audio)-1,len(audio)-len(b_enc),-1):
+    for i in range(len(audio)-1,len(audio)-len(b_enc)-1,-1):
+        # print(audio[i],"->",b_enc[len(audio)-i -1])
         val = bin(audio[i])[2:]
         val = ('0'*(8-len(val)))+val
         val = val[:-2]+'0'+ b_enc[j]    # '0' TO know that there is more data to decode
         audio[i] = int(val,2)
+        j+=1
+
+    # for i in range(len(audio)-1,len(audio)-len(b_enc),-1):
+    #     val = bin(audio[i])[2:]
+    #     val = ('0'*(8-len(val)))+val
+    #     val = val[:-2]+'0'+ b_enc[j]    # '0' TO know that there is more data to decode
+    #     audio[i] = int(val,2)
 
     eod_marker_pos = -(len(b_enc)+1)
 
     val = bin(audio[eod_marker_pos])[2:]
-    val = val = ('0'*(8-len(val)))+val
+    val = ('0'*(8-len(val)))+val
     val = val[:-2]+'1'+val[-1]
     audio[eod_marker_pos] = int(val,2)     # Mark the end of data
 

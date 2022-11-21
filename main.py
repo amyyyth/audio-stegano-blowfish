@@ -2,7 +2,7 @@ from utils import *
 from blowfish import *
 from encoder import *
 
-msg = "This is a sophisticated message or is it"
+msg = "Bro this is working fr fr fr"
 
 key = b"this is a secret key or is it"
 
@@ -16,7 +16,7 @@ end_encoder(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav",s_k
 
 s_key_rec = end_decoder(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav")
 
-s_key_dec = bf_dec(s_key_bf,key)
+s_key_dec = bf_dec(s_key_rec,key)
 
 cp = decode(r"C:\Users\amith\Code\crypto\audio-stegano-blowfish\encoded.wav",(s_key_dec))
 
