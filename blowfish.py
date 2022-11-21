@@ -29,7 +29,7 @@ def bf_dec(c_text,key):
 
     last_byte = msg[-1]
     msg = msg[:- (last_byte if type(last_byte) is int else ord(last_byte))]
-    return msg.decode()
+    return msg.decode(encoding="unicode_escape")
 
 key = b"this is a big stuff that is important"
 

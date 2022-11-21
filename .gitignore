@@ -129,6 +129,8 @@ env.bak/
 venv.bak/
 
 encoded.wav
+encoded_noisy.wav
+enc*.wav
 
 # Spyder project settings
 .spyderproject
