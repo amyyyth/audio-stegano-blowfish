@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.io.wavfile import read
 
 
-input_data1 = read("cover_trim.wav")
+input_data1 = read("cover.wav")
 audio1 = input_data1[1]
 input_data2 = read("encoded.wav")
 audio2 = input_data2[1]

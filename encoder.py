@@ -5,7 +5,7 @@ import numpy as np
 
     
 
-def encode_new(msg,cover, max_bit_depth,out_file):
+def encode_new(msg,cover, max_bit_depth,out_file="encoded.wav"):
 
     # READ AUDIO
     audio = read_audio(cover)
@@ -50,13 +50,14 @@ def encode_new(msg,cover, max_bit_depth,out_file):
     # WRITE INTO AUDIO FILE
     with open(out_file, mode='bw+') as f:
         f.write(audio)
-    print("max_diff = ",max_diff)
-    print("mean difference = ",np.mean(diff))
-    return s_key
+    # print("max_diff = ",max_diff)
+    mean_diff = np.mean(diff)
+    # print("mean difference = ", mean_diff)
+    return s_key, max_diff, mean_diff 
 
 
 
-def encode(msg,cover, max_bit_depth,out_file):
+def encode(msg,cover, max_bit_depth,out_file="encoded.wav"):
 
     max_diff = -math.inf
     diff = []
@@ -87,19 +88,22 @@ def encode(msg,cover, max_bit_depth,out_file):
             val = val[:-q] + b_enc[i] + val[-q+1:]
 
         max_diff = max(max_diff, abs(audio[s] - int(val,2)))
-        diff.append(abs(audio[s] - int(val,2)))
-        audio[s] = int(val,2)
+        # print("b = ",b_enc[i],"q = ",q," ",audio[s],"-->",int(val,2),bin(audio[s])[2:],"-->",val)
+        if(audio[s] != int(val,2)):
+            diff.append(abs(audio[s] - int(val,2)))
+            audio[s] = int(val,2)
         s += q
         t = sum_digits(s)
         q = t % max_bit_depth
 
     # WRITE INTO AUDIO FILE
-    print("max_diff = ",max_diff)
-    print("mean difference = ",np.mean(diff))
+    # print("max_diff = ",max_diff)
+    mean_diff = np.mean(diff)
+    # print("mean difference for old= ", mean_diff)
     with open(out_file, mode='bw+') as f:
         f.write(audio)
     
-    return s_key
+    return s_key,max_diff, mean_diff 
 
 
 def decode(file, max_bit_depth,s_key):
@@ -143,12 +147,6 @@ def end_encoder(cover, byts, out_file):
         val = val[:-2]+'0'+ b_enc[j]    # '0' TO know that there is more data to decode
         audio[i] = int(val,2)
         j+=1
-
-    # for i in range(len(audio)-1,len(audio)-len(b_enc),-1):
-    #     val = bin(audio[i])[2:]
-    #     val = ('0'*(8-len(val)))+val
-    #     val = val[:-2]+'0'+ b_enc[j]    # '0' TO know that there is more data to decode
-    #     audio[i] = int(val,2)
 
     eod_marker_pos = -(len(b_enc)+1)
 
