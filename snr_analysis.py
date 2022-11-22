@@ -1,7 +1,6 @@
 import numpy as np
 from encoder import *
 from blowfish import *
-import matplotlib.pyplot as plt
 from utils import *
 
 
