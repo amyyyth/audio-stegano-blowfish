@@ -1,12 +1,18 @@
 from utils import *
 from adjustment import *
+import math
+import numpy as np
 
     
 
-def encode_new(msg,cover,out_file):
+def encode_new(msg,cover, max_bit_depth,out_file):
 
     # READ AUDIO
     audio = read_audio(cover)
+
+    max_diff = -math.inf
+
+    diff = []
 
     # ENCODE THE MSG
     b_enc = binstream_to_bin(msg)
@@ -16,7 +22,7 @@ def encode_new(msg,cover,out_file):
     # COMPUTING THE FIRST LOCATION TO HIDE
     s = msg_len + 60         # Leave space for the header of the file to remain unchanged
     t = sum_digits(s)
-    q = t % 8
+    q = t % max_bit_depth
 
     # FIRST LOCATION TO HIDE IS THE KEY
     s_key = s
@@ -33,22 +39,27 @@ def encode_new(msg,cover,out_file):
         if(val[-q] != b_enc[i]):
             ad_val = adjust(dec_val,q,b_enc[i])
             # print("b = ",b_enc[i],"q = ",q," ",dec_val,"-->",ad_val,bin(dec_val)[2:],"-->",bin(ad_val)[2:])
+            max_diff = max(max_diff, abs(audio[s] - ad_val))
+            diff.append(abs(audio[s] - ad_val))
             audio[s] = ad_val
 
         s += q
         t = sum_digits(s)
-        q = t % 8
+        q = t % max_bit_depth
 
     # WRITE INTO AUDIO FILE
-    with open('encoded.wav', mode='bw+') as f:
+    with open(out_file, mode='bw+') as f:
         f.write(audio)
-    
+    print("max_diff = ",max_diff)
+    print("mean difference = ",np.mean(diff))
     return s_key
 
 
 
-def encode(msg,cover,out_file):
+def encode(msg,cover, max_bit_depth,out_file):
 
+    max_diff = -math.inf
+    diff = []
     # READ AUDIO
     audio = read_audio(cover)
 
@@ -60,7 +71,7 @@ def encode(msg,cover,out_file):
     # COMPUTING THE FIRST LOCATION TO HIDE
     s = msg_len + 60         # Leave space for the header of the file to remain unchanged
     t = sum_digits(s)
-    q = t % 8
+    q = t % max_bit_depth
 
     # FIRST LOCATION TO HIDE IS THE KEY
     s_key = s
@@ -75,19 +86,23 @@ def encode(msg,cover,out_file):
         else:
             val = val[:-q] + b_enc[i] + val[-q+1:]
 
+        max_diff = max(max_diff, abs(audio[s] - int(val,2)))
+        diff.append(abs(audio[s] - int(val,2)))
         audio[s] = int(val,2)
         s += q
         t = sum_digits(s)
-        q = t % 8
+        q = t % max_bit_depth
 
     # WRITE INTO AUDIO FILE
-    with open('encoded.wav', mode='bw+') as f:
+    print("max_diff = ",max_diff)
+    print("mean difference = ",np.mean(diff))
+    with open(out_file, mode='bw+') as f:
         f.write(audio)
     
     return s_key
 
 
-def decode(file,s_key):
+def decode(file, max_bit_depth,s_key):
 
     # READ AUDIO
     audio = read_audio(file)
@@ -108,12 +123,12 @@ def decode(file,s_key):
         b += byt[-q]
         s += q
         t = sum_digits(s)
-        q = t % 8
+        q = t % max_bit_depth
 
     return bin_to_binstream(b)
 
 
-def end_encoder(cover, byts):
+def end_encoder(cover, byts, out_file):
     # READ AUDIO
     audio = read_audio(cover)
 
@@ -143,7 +158,7 @@ def end_encoder(cover, byts):
     audio[eod_marker_pos] = int(val,2)     # Mark the end of data
 
     # WRITE INTO AUDIO FILE
-    with open('encoded.wav', mode='bw+') as f:
+    with open(out_file, mode='bw+') as f:
         f.write(audio)
 
 def end_decoder(aud):
@@ -161,9 +176,9 @@ def end_decoder(aud):
 
 
 
-msg = b"sed euismod nisi porta lorem mollis aliquam ut porttitor leo a diam sollicitudin tempor id eu nisl nunc mi ipsum faucibus vitae aliquet nec ullamcorper sit amet risus nullam eget felis eget nunc lobortis mattis aliquam faucibus purus in massa tempor nec feugiat nisl pretium fusce id velit ut tortor pretium viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra tellus in hac habitasse platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at varius vel pharetra vel turpis nunc eget lorem dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque convallis a cras semper auctor neque vitae tempus quam pellentesque nec nam aliquam sem et tortor consequat id porta nibh venenatis cras sed felis eget velit aliquet sagittis id consectetur purus ut faucibus pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper quis lectus nulla at volutpat diam ut venenatis tellus in metus vulputate eu scelerisque felis imperdiet proin fermentum leo vel orci porta non pulvinar neque laoreet suspendisse interdum consectetur libero id faucibus nisl tincidunt eget nullam non nisi est sit amet facilisis magna etiam tempor orci eu lobortis elementum nibh tellus molestie nunc non blandit massa enim nec dui nunc mattis enim ut tellus elementum sagittis vitae et leo duis ut diam quam nulla porttitor massa id neque aliquam vestibulum morbi blandit cursus risus at ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum sociis natoque penatibus et magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies leo integer malesuada nunc vel risus commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit egestas dui id ornare arcu odio ut sem nulla pharetra diam sit amet nisl suscipit adipiscing bibendum est ultricies integer quis auctor elit sed vulputate mi sit amet mauris commodo quis imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc consequat interdum varius sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus accumsan tortor posuere ac ut consequat"
+# msg = b"sed euismod nisi porta lorem mollis aliquam ut porttitor leo a diam sollicitudin tempor id eu nisl nunc mi ipsum faucibus vitae aliquet nec ullamcorper sit amet risus nullam eget felis eget nunc lobortis mattis aliquam faucibus purus in massa tempor nec feugiat nisl pretium fusce id velit ut tortor pretium viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare suspendisse sed nisi lacus sed viverra tellus in hac habitasse platea dictumst vestibulum rhoncus est pellentesque elit ullamcorper dignissim cras tincidunt lobortis feugiat vivamus at augue eget arcu dictum varius duis at consectetur lorem donec massa sapien faucibus et molestie ac feugiat sed lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt ornare massa eget egestas purus viverra accumsan in nisl nisi scelerisque eu ultrices vitae auctor eu augue ut lectus arcu bibendum at varius vel pharetra vel turpis nunc eget lorem dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida neque convallis a cras semper auctor neque vitae tempus quam pellentesque nec nam aliquam sem et tortor consequat id porta nibh venenatis cras sed felis eget velit aliquet sagittis id consectetur purus ut faucibus pulvinar elementum integer enim neque volutpat ac tincidunt vitae semper quis lectus nulla at volutpat diam ut venenatis tellus in metus vulputate eu scelerisque felis imperdiet proin fermentum leo vel orci porta non pulvinar neque laoreet suspendisse interdum consectetur libero id faucibus nisl tincidunt eget nullam non nisi est sit amet facilisis magna etiam tempor orci eu lobortis elementum nibh tellus molestie nunc non blandit massa enim nec dui nunc mattis enim ut tellus elementum sagittis vitae et leo duis ut diam quam nulla porttitor massa id neque aliquam vestibulum morbi blandit cursus risus at ultrices mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum sociis natoque penatibus et magnis dis parturient montes nascetur ridiculus mus mauris vitae ultricies leo integer malesuada nunc vel risus commodo viverra maecenas accumsan lacus vel facilisis volutpat est velit egestas dui id ornare arcu odio ut sem nulla pharetra diam sit amet nisl suscipit adipiscing bibendum est ultricies integer quis auctor elit sed vulputate mi sit amet mauris commodo quis imperdiet massa tincidunt nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc consequat interdum varius sit amet mattis vulputate enim nulla aliquet porttitor lacus luctus accumsan tortor posuere ac ut consequat"
 
 
-s_key = encode_new(msg,r"cover.wav","encoded_new.wav")
+# s_key = encode_new(msg,r"cover.wav",4 ,"encoded_new.wav")
 
-s_key = encode(msg,r"cover.wav","encoded_old.wav")
+# s_key = encode(msg,r"cover.wav",4,"encoded_old.wav")
